@@ -99,6 +99,7 @@ extension ViewController: NSTextViewDelegate {
         DispatchQueue.global(qos: .userInitiated).async {
             let value = self.generalScripts.do_action(actionId)
             
+            self.refreshContent()
             print("handleLink: result: \(value.was_successful) msg: \(value.message)")
         }
         

@@ -25,10 +25,10 @@ folder_b = "/Users/goncalopalaio/tmp/test_git_repo_b"
 folder_c = "/Users/goncalopalaio/tmp/test_git_repo_c"
 folder_d = "/Users/goncalopalaio/tmp/test_git_repo_d"
 
-REPOSITORIES = [Repository("A", folder_a, generate_branch_name_func),
-				Repository("B", folder_b, generate_branch_name_func),
-				Repository("C", folder_c, generate_branch_name_func),
-				Repository("D", folder_d, generate_branch_name_func),
+REPOSITORIES = [Repository("Main", folder_a, generate_branch_name_func),
+				Repository("Library", folder_b, generate_branch_name_func),
+				Repository("Look", folder_c, generate_branch_name_func),
+				Repository("Environment", folder_d, generate_branch_name_func),
 ]
 
 class Issue:
@@ -76,29 +76,38 @@ def get_html_content():
 
 	for repository in REPOSITORIES:
 		html_content += "</br>"
-		html_content += "<h3>%s</h3>" % (repository.name)
-		html_content += "<p>%s</p>" % (git_current_branch(repository.path).message)	
+		html_content += "<h3>%s :: %s</h3>" % (repository.name, git_current_branch(repository.path).message)
 		
 		go_to_develop_key = "go_to_develop_%s" % (repository.name)
 		fetch_pull_key = "fetch_pull_%s" % (repository.name)
 
 		ACTIONS[go_to_develop_key] = change_branch_func(repository.path, "develop")
-		ACTIONS[fetch_pull_key] = fetch_pull_func(folder_c)
+		ACTIONS[fetch_pull_key] = fetch_pull_func(repository.path)
 
-		html_content += _str_link(go_to_develop_key, "Go to develop %s" % (repository.name))
-		html_content += _str_link(fetch_pull_key, "Fetch and pull %s" % (repository.name))
+		html_content += "<ul>"
+		html_content += _str_link(go_to_develop_key, "Go to develop")
+		html_content += _str_link(fetch_pull_key, "Fetch and pull")
+		html_content += "</ul>"
 
 	for issue in placeholder_issues:
 		html_content += "</br>"
 		html_content += "<h2>%s</h2>" % (issue.title)
 		for repository in REPOSITORIES:
+			html_content += "</br>"
 			html_content += "<h3>%s</h3>" % (repository.name)
-			key = "create_branch_%s_%s" % (repository.name, issue.identifier)
 			branch_name = issue.generate_branch_name(repository)
-			ACTIONS[key] = create_branch_func(repository.path, branch_name)
+			
+			key_create_branch = "create_branch_%s_%s" % (repository.name, issue.identifier)
+			ACTIONS[key_create_branch] = create_branch_func(repository.path, branch_name)
 
-			print("D:: %s" % (branch_name))
-			html_content += _str_link(key, "Create branch %s" % (branch_name))
+			key_change_to_branch = "change_to_branch_%s_%s" % (repository.name, issue.identifier)
+			ACTIONS[key_change_to_branch] = change_branch_func(repository.path, branch_name)
+
+			html_content += "<ul>"
+			html_content += _str_link(key_create_branch, "Create branch: %s" % (branch_name))
+			html_content += _str_link(key_change_to_branch, "Change to branch: %s" % (branch_name))
+			html_content += "</ul>"
+
 
 	return html_start + html_content + html_end
 
